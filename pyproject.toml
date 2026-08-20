@@ -1,0 +1,10 @@
+[project]
+name = "ecosort-ai"
+version = "1.0.0"
+description = "Environmental computer-vision project for recyclable-waste classification"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
