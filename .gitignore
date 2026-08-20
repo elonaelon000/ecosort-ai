@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Data: keep attribution docs, not downloaded images
+/data/raw/*
+!/data/raw/.gitkeep
+/data/processed/*
+!/data/processed/.gitkeep
+/data/*.zip
+
+# Model artifacts and generated reports
+/models/*.pt
+/models/*.pth
+/reports/*.png
+/reports/*.json
+/reports/*.txt
+
+# Gradio cache
+.gradio/
