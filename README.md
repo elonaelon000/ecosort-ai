@@ -1,5 +1,15 @@
 # EcoSort AI
 
+## 🚀 Live Demo
+
+### [Try EcoSort AI in your browser →](https://ecosort-ai-elonagit.streamlit.app)
+
+Upload a photo of a waste item and the live model will classify it as **cardboard, glass, metal, paper, plastic, or trash**, show its confidence, and provide disposal guidance.
+
+**Current model:** MobileNetV3 transfer learning · **90.4% test accuracy** · **0.908 macro F1** on 384 held-out TrashNet images.
+
+---
+
 **EcoSort AI** is an environmental computer-vision project that classifies a photo of a waste item into one of six broad categories and gives a simple disposal suggestion.
 
 The project is intentionally built as a full machine-learning workflow rather than a single notebook: data acquisition, dataset splitting, exploratory analysis, model training, evaluation, error analysis, and an interactive browser demo.
@@ -40,6 +50,7 @@ python scripts/download_trashnet.py
 ```text
 ecosort-ai/
 ├── app.py
+├── streamlit_app.py
 ├── README.md
 ├── DATA_SOURCES.md
 ├── MODEL_CARD.md
@@ -154,18 +165,27 @@ Do not judge the model from accuracy alone. The `trash` class is much smaller th
 
 ## Interactive demo
 
-After training:
+### Live browser demo
+
+Open the deployed Streamlit application:
+
+**[https://ecosort-ai-elonagit.streamlit.app](https://ecosort-ai-elonagit.streamlit.app)**
+
+A reviewer can upload a waste image and see the predicted class, confidence score, top alternatives, and disposal guidance.
+
+### Local demo
+
+After training locally:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+The original Gradio interface is also available with:
 
 ```bash
 python app.py
 ```
-
-Gradio opens a local browser interface where a user can upload an image and see:
-
-- predicted material class
-- confidence score
-- top predictions
-- generic disposal guidance
 
 ## Tests
 
