@@ -1,28 +1,17 @@
 # EcoSort AI
 
-EcoSort AI is a computer-vision project for classifying common household waste into six categories: **cardboard, glass, metal, paper, plastic, and trash**.
+Image classification for everyday waste sorting.
 
 **Live demo:** https://ecosort-ai-elonagit.streamlit.app  
-**Model:** MobileNetV3 transfer learning  
+**Model:** MobileNetV3 Small (transfer learning)  
 **Test accuracy:** 90.4%  
 **Macro F1:** 0.908
 
-## Overview
-
-The project covers the full image-classification workflow: dataset preparation, augmentation, model training, evaluation, inference, and deployment.
-
-A user can upload a photo through the Streamlit app and receive:
-
-- the predicted waste category
-- a confidence score
-- the top three predictions
-- basic disposal guidance
-
-The repository also includes the training pipeline, evaluation reports, tests, and model documentation.
+EcoSort AI takes a photo of a single waste item and predicts one of six classes: **cardboard, glass, metal, paper, plastic, or trash**. The Streamlit demo also shows prediction confidence, the top three classes, and a basic disposal suggestion.
 
 ## Results
 
-The deployed model was evaluated on **384 held-out TrashNet images**.
+The deployed model was evaluated on a held-out split of **384 TrashNet images**.
 
 | Metric | Result |
 | --- | ---: |
@@ -30,37 +19,36 @@ The deployed model was evaluated on **384 held-out TrashNet images**.
 | Macro F1 | 0.908 |
 | Test images | 384 |
 
-Per-class results and the confusion matrix are available in the [`reports/`](reports/) directory.
+Detailed results are stored in [`reports/`](reports/), including the classification report and confusion matrix.
 
 ## Dataset
 
-EcoSort AI uses the **TrashNet** dataset created by Gary Thung and Mindy Yang. The dataset contains 2,527 resized images across six waste categories.
+This project uses **TrashNet**, created by Gary Thung and Mindy Yang. It contains 2,527 images across the six waste categories used here.
 
-The images are not stored in this repository. The download script retrieves the dataset from the documented source and verifies the archive checksum before extraction.
+The dataset is not committed to this repository. `scripts/download_trashnet.py` downloads it from the documented source and verifies the archive checksum before extraction.
 
-Dataset attribution and licensing details are in [`DATA_SOURCES.md`](DATA_SOURCES.md).
+Source and license information: [`DATA_SOURCES.md`](DATA_SOURCES.md)
 
 ## Model
 
-Two architectures are included:
+The repository includes two model options:
 
-### Baseline CNN
+- **Baseline CNN** — a small convolutional network trained from scratch.
+- **MobileNetV3 Small** — transfer learning with ImageNet pretrained weights. This is the model used by the deployed app.
 
-A small convolutional neural network trained from scratch. It is useful as a simple baseline and for understanding the effect of the training pipeline without pretrained features.
+Training uses image augmentation, class weighting, early stopping, and learning-rate scheduling.
+
+Train the baseline:
 
 ```bash
 python -m src.ecosort.train --architecture baseline
 ```
 
-### MobileNetV3
-
-The deployed version uses **MobileNetV3 Small** with ImageNet pretrained weights and transfer learning.
+Train MobileNetV3:
 
 ```bash
 python -m src.ecosort.train --architecture mobilenet --pretrained
 ```
-
-Training includes image augmentation, class weighting, early stopping, and learning-rate scheduling.
 
 ## Run locally
 
@@ -68,64 +56,41 @@ Python 3.11 or 3.12 is recommended.
 
 ```bash
 python -m venv .venv
-```
-
-Activate the environment, then install the dependencies:
-
-```bash
 python -m pip install -r requirements.txt
 ```
 
-Download and prepare TrashNet:
+Download and prepare the dataset:
 
 ```bash
 python scripts/download_trashnet.py
 python scripts/prepare_dataset.py
 ```
 
-To run the existing trained model with Streamlit:
+Start the Streamlit app:
 
 ```bash
 streamlit run streamlit_app.py
 ```
 
-To reproduce the full baseline workflow:
+Run the baseline pipeline from download through evaluation:
 
 ```bash
 python scripts/run_pipeline.py
 ```
 
-## Project structure
-
-```text
-ecosort-ai/
-├── streamlit_app.py        # deployed web interface
-├── app.py                  # Gradio interface
-├── src/ecosort/            # training, evaluation and inference code
-├── scripts/                # dataset and pipeline utilities
-├── models/                 # trained model checkpoint
-├── reports/                # metrics and evaluation figures
-├── tests/                  # automated tests
-├── DATA_SOURCES.md
-├── MODEL_CARD.md
-└── requirements.txt
-```
-
 ## Evaluation
-
-Run evaluation against the prepared test split with:
 
 ```bash
 python -m src.ecosort.evaluate
 ```
 
-The evaluation step produces:
+This writes the main evaluation artifacts to `reports/`:
 
 - `metrics.json`
 - `classification_report.txt`
 - `confusion_matrix.png`
 
-The project reports both overall accuracy and macro F1 because the dataset is not perfectly balanced across classes.
+Accuracy is reported together with macro F1 because the class distribution is uneven, especially for the `trash` class.
 
 ## Tests
 
@@ -133,15 +98,32 @@ The project reports both overall accuracy and macro F1 because the dataset is no
 pytest
 ```
 
-The test suite covers deterministic dataset splitting, model output shape, prediction utilities, and disposal guidance.
+Tests cover dataset splitting, model output shape, prediction helpers, and disposal guidance.
+
+## Repository layout
+
+```text
+ecosort-ai/
+├── streamlit_app.py        # deployed Streamlit interface
+├── app.py                  # Gradio interface
+├── src/ecosort/            # model, training, evaluation and inference code
+├── scripts/                # dataset and pipeline scripts
+├── models/                 # trained checkpoint
+├── reports/                # metrics and evaluation figures
+├── tests/
+├── DATA_SOURCES.md
+├── MODEL_CARD.md
+└── requirements.txt
+```
 
 ## Limitations
 
-TrashNet was photographed mostly against simple backgrounds, so performance can drop on cluttered scenes, poor lighting, damaged items, or objects made from multiple materials.
+TrashNet images are mostly photographed against simple backgrounds. Real-world photos can be harder: clutter, poor lighting, damaged objects, mixed materials, and unusual angles can all reduce prediction quality.
 
-The disposal guidance in the demo is general information. Local recycling rules can differ by municipality and facility.
+The disposal suggestion is intentionally general. Recycling rules vary by location, so the app should not be treated as a local recycling authority.
 
-## References
+## Documentation
 
-- TrashNet dataset and original project: documented in [`DATA_SOURCES.md`](DATA_SOURCES.md)
-- Model details and intended use: [`MODEL_CARD.md`](MODEL_CARD.md)
+- [`MODEL_CARD.md`](MODEL_CARD.md) — model details, evaluation, intended use, and limitations
+- [`DATA_SOURCES.md`](DATA_SOURCES.md) — dataset source, attribution, and license notes
+- [`LEARNING_NOTES.md`](LEARNING_NOTES.md) — project notes and implementation decisions
