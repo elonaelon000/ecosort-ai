@@ -1,87 +1,68 @@
 # EcoSort AI
 
-## 🚀 Live Demo
+EcoSort AI is a computer-vision project for classifying common household waste into six categories: **cardboard, glass, metal, paper, plastic, and trash**.
 
-### [Try EcoSort AI in your browser →](https://ecosort-ai-elonagit.streamlit.app)
+**Live demo:** https://ecosort-ai-elonagit.streamlit.app  
+**Model:** MobileNetV3 transfer learning  
+**Test accuracy:** 90.4%  
+**Macro F1:** 0.908
 
-Upload a photo of a waste item and the live model will classify it as **cardboard, glass, metal, paper, plastic, or trash**, show its confidence, and provide disposal guidance.
+## Overview
 
-**Current model:** MobileNetV3 transfer learning · **90.4% test accuracy** · **0.908 macro F1** on 384 held-out TrashNet images.
+The project covers the full image-classification workflow: dataset preparation, augmentation, model training, evaluation, inference, and deployment.
 
----
+A user can upload a photo through the Streamlit app and receive:
 
-**EcoSort AI** is an environmental computer-vision project that classifies a photo of a waste item into one of six broad categories and gives a simple disposal suggestion.
+- the predicted waste category
+- a confidence score
+- the top three predictions
+- basic disposal guidance
 
-The project is intentionally built as a full machine-learning workflow rather than a single notebook: data acquisition, dataset splitting, exploratory analysis, model training, evaluation, error analysis, and an interactive browser demo.
+The repository also includes the training pipeline, evaluation reports, tests, and model documentation.
 
-## Problem
+## Results
 
-People often place waste in the wrong bin because material categories are not always obvious. EcoSort AI explores a narrow question:
+The deployed model was evaluated on **384 held-out TrashNet images**.
 
-> Can a computer-vision model recognize the broad material category of a single waste item from an image?
+| Metric | Result |
+| --- | ---: |
+| Accuracy | 90.4% |
+| Macro F1 | 0.908 |
+| Test images | 384 |
 
-This is an educational prototype. It is **not** an official recycling authority. Real disposal rules depend on local facilities, contamination, coatings, mixed materials, and regulations that may not be visible from a photo.
-
-## Classes
-
-The first version uses the six TrashNet classes:
-
-- cardboard
-- glass
-- metal
-- paper
-- plastic
-- trash
+Per-class results and the confusion matrix are available in the [`reports/`](reports/) directory.
 
 ## Dataset
 
-The project uses **TrashNet**, created by Gary Thung and Mindy Yang for a Stanford CS 229 project. The original repository describes 2,527 resized images across the six classes and asks dataset users to cite the repository. The repository is MIT licensed.
+EcoSort AI uses the **TrashNet** dataset created by Gary Thung and Mindy Yang. The dataset contains 2,527 resized images across six waste categories.
 
-Dataset source and license notes are recorded in [`DATA_SOURCES.md`](DATA_SOURCES.md).
+The images are not stored in this repository. The download script retrieves the dataset from the documented source and verifies the archive checksum before extraction.
 
-The dataset itself is **not committed to this repository**. Download it with:
+Dataset attribution and licensing details are in [`DATA_SOURCES.md`](DATA_SOURCES.md).
+
+## Model
+
+Two architectures are included:
+
+### Baseline CNN
+
+A small convolutional neural network trained from scratch. It is useful as a simple baseline and for understanding the effect of the training pipeline without pretrained features.
 
 ```bash
-python scripts/download_trashnet.py
+python -m src.ecosort.train --architecture baseline
 ```
 
-## Project structure
+### MobileNetV3
 
-```text
-ecosort-ai/
-├── app.py
-├── streamlit_app.py
-├── README.md
-├── DATA_SOURCES.md
-├── MODEL_CARD.md
-├── PROJECT_PLAN.md
-├── LEARNING_NOTES.md
-├── requirements.txt
-├── pyproject.toml
-├── data/
-│   ├── README.md
-│   ├── raw/
-│   └── processed/
-├── models/
-├── reports/
-├── scripts/
-│   ├── download_trashnet.py
-│   ├── prepare_dataset.py
-│   └── run_pipeline.py
-├── src/
-│   └── ecosort/
-│       ├── config.py
-│       ├── data.py
-│       ├── eda.py
-│       ├── evaluate.py
-│       ├── guidance.py
-│       ├── model.py
-│       ├── predict.py
-│       └── train.py
-└── tests/
+The deployed version uses **MobileNetV3 Small** with ImageNet pretrained weights and transfer learning.
+
+```bash
+python -m src.ecosort.train --architecture mobilenet --pretrained
 ```
 
-## Quick start
+Training includes image augmentation, class weighting, early stopping, and learning-rate scheduling.
+
+## Run locally
 
 Python 3.11 or 3.12 is recommended.
 
@@ -89,107 +70,62 @@ Python 3.11 or 3.12 is recommended.
 python -m venv .venv
 ```
 
-macOS/Linux:
-
-```bash
-source .venv/bin/activate
-```
-
-Windows PowerShell:
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-Install dependencies:
+Activate the environment, then install the dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### Option A: run the complete baseline pipeline
-
-```bash
-python scripts/run_pipeline.py
-```
-
-That command downloads TrashNet, creates deterministic train/validation/test splits, generates EDA, trains the baseline CNN, and evaluates it on the untouched test set.
-
-### Option B: run one step at a time
+Download and prepare TrashNet:
 
 ```bash
 python scripts/download_trashnet.py
 python scripts/prepare_dataset.py
-python -m src.ecosort.eda
-python -m src.ecosort.train --architecture baseline
-python -m src.ecosort.evaluate
 ```
 
-## Models
-
-EcoSort AI contains two architectures.
-
-### 1. Baseline CNN
-
-A small convolutional neural network trained from scratch. This is the best model to start with because every layer and training decision is visible and explainable.
-
-```bash
-python -m src.ecosort.train --architecture baseline
-```
-
-### 2. MobileNetV3 transfer learning
-
-After understanding the baseline, train a transfer-learning model:
-
-```bash
-python -m src.ecosort.train --architecture mobilenet --pretrained
-```
-
-The first run may download ImageNet weights through torchvision.
-
-## Evaluation
-
-```bash
-python -m src.ecosort.evaluate
-```
-
-Generated files include:
-
-- `reports/metrics.json`
-- `reports/classification_report.txt`
-- `reports/confusion_matrix.png`
-- `reports/class_distribution.png`
-- `reports/sample_grid.png`
-
-Do not judge the model from accuracy alone. The `trash` class is much smaller than several other classes, so macro F1, per-class recall, and the confusion matrix matter.
-
-## Interactive demo
-
-### Public demo
-
-**[Open the live Streamlit app →](https://ecosort-ai-elonagit.streamlit.app)**
-
-The deployed app lets a reviewer upload an image and see:
-
-- predicted material class
-- confidence score
-- top three predictions
-- generic disposal guidance
-- current model evaluation metrics
-
-### Run locally
-
-Streamlit:
+To run the existing trained model with Streamlit:
 
 ```bash
 streamlit run streamlit_app.py
 ```
 
-The original Gradio interface can also be run with:
+To reproduce the full baseline workflow:
 
 ```bash
-python app.py
+python scripts/run_pipeline.py
 ```
+
+## Project structure
+
+```text
+ecosort-ai/
+├── streamlit_app.py        # deployed web interface
+├── app.py                  # Gradio interface
+├── src/ecosort/            # training, evaluation and inference code
+├── scripts/                # dataset and pipeline utilities
+├── models/                 # trained model checkpoint
+├── reports/                # metrics and evaluation figures
+├── tests/                  # automated tests
+├── DATA_SOURCES.md
+├── MODEL_CARD.md
+└── requirements.txt
+```
+
+## Evaluation
+
+Run evaluation against the prepared test split with:
+
+```bash
+python -m src.ecosort.evaluate
+```
+
+The evaluation step produces:
+
+- `metrics.json`
+- `classification_report.txt`
+- `confusion_matrix.png`
+
+The project reports both overall accuracy and macro F1 because the dataset is not perfectly balanced across classes.
 
 ## Tests
 
@@ -197,25 +133,15 @@ python app.py
 pytest
 ```
 
-The tests verify deterministic data splitting, model output shape, prediction utilities, and disposal guidance. They do not download the dataset or train the full model.
+The test suite covers deterministic dataset splitting, model output shape, prediction utilities, and disposal guidance.
 
-## What makes this a machine-learning project
+## Limitations
 
-This repository demonstrates:
+TrashNet was photographed mostly against simple backgrounds, so performance can drop on cluttered scenes, poor lighting, damaged items, or objects made from multiple materials.
 
-- supervised image classification
-- image preprocessing and augmentation
-- train / validation / test separation
-- class imbalance awareness
-- convolutional neural networks
-- transfer learning
-- early stopping
-- learning-rate scheduling
-- precision, recall, F1, and confusion matrices
-- model checkpointing and reproducibility
-- interactive inference
-- model limitations and responsible-use documentation
+The disposal guidance in the demo is general information. Local recycling rules can differ by municipality and facility.
 
-## Portfolio rule
+## References
 
-Do not invent performance numbers. After each real training run, record the model, settings, metrics, mistakes, and lessons in [`MODEL_CARD.md`](MODEL_CARD.md). The reasoning is more valuable than a suspiciously perfect score.
+- TrashNet dataset and original project: documented in [`DATA_SOURCES.md`](DATA_SOURCES.md)
+- Model details and intended use: [`MODEL_CARD.md`](MODEL_CARD.md)
