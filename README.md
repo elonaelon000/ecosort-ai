@@ -165,23 +165,27 @@ Do not judge the model from accuracy alone. The `trash` class is much smaller th
 
 ## Interactive demo
 
-### Live browser demo
+### Public demo
 
-Open the deployed Streamlit application:
+**[Open the live Streamlit app →](https://ecosort-ai-elonagit.streamlit.app)**
 
-**[https://ecosort-ai-elonagit.streamlit.app](https://ecosort-ai-elonagit.streamlit.app)**
+The deployed app lets a reviewer upload an image and see:
 
-A reviewer can upload a waste image and see the predicted class, confidence score, top alternatives, and disposal guidance.
+- predicted material class
+- confidence score
+- top three predictions
+- generic disposal guidance
+- current model evaluation metrics
 
-### Local demo
+### Run locally
 
-After training locally:
+Streamlit:
 
 ```bash
 streamlit run streamlit_app.py
 ```
 
-The original Gradio interface is also available with:
+The original Gradio interface can also be run with:
 
 ```bash
 python app.py
